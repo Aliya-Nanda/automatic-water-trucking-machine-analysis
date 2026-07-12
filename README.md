@@ -55,25 +55,6 @@ The program evaluates several engineering indicators, including:
 
 ---
 
-## 📂 Repository Structure
-
-```
-automatic-water-trucking-machine-analysis
-│
-├── README.md
-├── LICENSE
-│
-├── src
-│   └── AutomaticWaterTruckingMachinePerformanceAnalysis.m
-│
-├── report
-│   └── AutomaticWaterTruckingMachinePerformanceAnalysis.html
-│
-└── images
-```
-
----
-
 ## 👩‍💻 Author
 
 **Nadiya Aliya Nanda**
