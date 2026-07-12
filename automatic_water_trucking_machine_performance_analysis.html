@@ -1,0 +1,207 @@
+========================================================================
+========================================================================
+========================================================================
+========================================================================
+========================================================================
+========================================================================
+========================================================================
+PROJECT: AUTOMATIC WATER TRUCKING MACHINE - KELOMPOK 2
+========================================================================
+Deskripsi: Industrial Performance Evaluator untuk PRD FTMD 2026 Kelas : 56
+Fungsi : Memverifikasi kelayakan desain terhadap Demands & Wishes Author :
+Kelompok 2 - PRD FTMD 2026
+======================================================================== clear;
+clc; close all;
+======================================================================== 1.
+PARAMETER INPUT (DATA NYATA PROYEK KELOMPOK 2)
+======================================================================== %
+-------------------- Data Geometri & Fisik -------------------- platform_size =
+[25, 20]; % cm (Panjang x Lebar chassis) m_mdf_structure = 0.85; % kg (Estimasi
+berat bodi laser-cut 6mm MDF) m_electronics = 0.40; % kg (Arduino Mega, 4 motor,
+baterai LiPo, sensor) m_motor = 0.12; % kg (4 motor DC @ 30g each) m_roda =
+0.08; % kg (4 roda + as) % -------------------- Data Muatan (Payload)
+-------------------- n_cups = 4; % Jumlah gelas yang digunakan vol_per_cup =
+200; % ml (Kapasitas standar gelas plastik) fill_percentage = 0.85; % 85% terisi
+(untuk menghindari tumpah) % -------------------- Data Arena & Misi
+-------------------- track_length = 3.0; % meter (Jarak tempuh satu arah)
+avg_velocity = 0.15; % m/s (Kecepatan cruising estimasi) docking_time = 10; %
+detik (Waktu proses pengisian air) bump_height = 20; % mm (Tinggi rintangan
+gundukan) bump_width = 40; % mm (Lebar rintangan = 20 x 2) n_bumps = 3; % Jumlah
+gundukan di arena % -------------------- Target Kinerja (Demands & Wishes)
+-------------------- target_water_volume = 550; % ml (DEMAND 1: Minimal 550ml)
+target_weight_ratio = 2; % (WISHES 1: Rasio berat < 2:1) target_mission_time =
+60; % detik (WISHES 3: Misi < 60 detik) target_stability = 1.0; % cm (Batas
+simpangan vertikal aman)
+======================================================================== 2.
+PERHITUNGAN TEKNIS (KPI CALCULATIONS)
+======================================================================== %
+-------------------- Perhitungan Massa -------------------- total_water_vol =
+n_cups * vol_per_cup * fill_percentage; % ml m_water = total_water_vol / 1000; %
+kg (1L = 1kg) m_dry = m_mdf_structure + m_electronics + m_motor + m_roda; %
+Berat kosong m_total = m_dry + m_water; % Berat total % --------------------
+Perhitungan Rasio Berat (WISHES 1) -------------------- weight_to_payload_ratio
+= m_dry / m_water; % -------------------- Perhitungan Waktu Misi (WISHES 3)
+-------------------- time_travel = (track_length * 2) / avg_velocity; % Maju +
+Mundur total_mission_time = time_travel + docking_time; % --------------------
+Perhitungan Stabilitas (Getaran) -------------------- k_chassis = 800; % N/m
+(kekakuan struktural MDF) wn = sqrt(k_chassis / m_total); % Frekuensi natural
+(rad/s) % Variasi kecepatan untuk pengujian v_test = [0.1, 0.15, 0.2, 0.25,
+0.3]; % m/s y_max = zeros(1, length(v_test)); % Informasi gundukan yang
+diperbarui fprintf('--- Informasi Gundukan ---\n'); fprintf(' Tinggi gundukan :
+%d mm\n', bump_height); fprintf(' Lebar gundukan : %d mm (20 x 2)\n',
+bump_width); fprintf(' Jumlah gundukan : %d buah\n', n_bumps); fprintf(' Total
+lintasan : %.0f mm (40 x 3)\n', bump_width * n_bumps); fprintf(' Jarak antar :
+%.0f mm\n\n', (track_length*1000 - bump_width*n_bumps)/(n_bumps-1)); for i =
+1:length(v_test) % Waktu kontak dengan satu gundukan t_contact =
+(bump_width/1000) / v_test(i); % Frekuensi eksitasi dari gundukan f_excitation =
+1 / t_contact; % Rasio frekuensi (r = f_excitation / fn) r = (f_excitation) /
+(wn/(2*pi)); % Faktor amplifikasi (untuk sistem underdamped/) zeta_assumed =
+0.3; % Asumsi redaman rendah (tanpa suspensi aktif) amplification = 1 / sqrt((1
+- r^2)^2 + (2*zeta_assumed*r)^2); % Simpangan maksimum yang terjadi (konversi mm
+ke cm) y_max(i) = (bump_height/10) * amplification; end % Cek apakah stabil
+(simpangan < batas aman) stability_status = y_max <= target_stability; %
+-------------------- Perhitungan Biaya (Tambahan) -------------------- cost_mdf
+= 50000; % Rp (harga MDF per lembar) cost_electronics = 350000; % Rp (Arduino,
+motor, sensor) cost_other = 100000; % Rp (baut, kabel, dll) total_cost =
+cost_mdf + cost_electronics + cost_other; --- Informasi Gundukan --- Tinggi
+gundukan : 20 mm Lebar gundukan : 40 mm (20 x 2) Jumlah gundukan : 3 buah Total
+lintasan : 120 mm (40 x 3) Jarak antar : 1440 mm
+======================================================================== 3.
+EVALUASI KEPATUHAN (AUTOMATED TESTING REPORT)
+========================================================================
+fprintf('========================================\n'); fprintf(' KELOMPOK 2 -
+DESIGN EVALUATION REPORT\n'); fprintf(' PRD FTMD 2026 - Kelas 56\n'); fprintf('
+Automatic Water Trucking Machine\n');
+fprintf('========================================\n\n'); fprintf('--- PARAMETER
+KENDARAAN ---\n'); fprintf(' Massa Kering (m_dry) : %.3f kg\n', m_dry);
+fprintf(' Massa Air (m_water) : %.3f kg (%.1f ml)\n', m_water, total_water_vol);
+fprintf(' Massa Total (m_total) : %.3f kg\n', m_total); fprintf(' Rasio
+Berat/Payload : %.2f : 1\n', weight_to_payload_ratio); fprintf(' Kecepatan
+Rata-rata : %.2f m/s\n', avg_velocity); fprintf(' Estimasi Waktu Misi : %.1f
+detik\n', total_mission_time); fprintf(' Estimasi Biaya : Rp %.0f\n\n',
+total_cost); fprintf('--- STATUS KEPATUHAN ---\n'); % --------------------
+DEMAND 1: Volume Air -------------------- if total_water_vol >=
+target_water_volume fprintf(' [PASS] DEMAND 1: Volume Air (%.1f ml) >= %.0f
+ml\n', ... total_water_vol, target_water_volume); else fprintf(' [FAIL] DEMAND
+1: Volume Air (%.1f ml) < %.0f ml\n', ... total_water_vol, target_water_volume);
+end % -------------------- WISHES 1: Rasio Berat -------------------- if
+weight_to_payload_ratio < target_weight_ratio fprintf(' [PASS] WISHES 1: Rasio
+Berat (%.2f) < %.0f:1\n', ... weight_to_payload_ratio, target_weight_ratio);
+else fprintf(' [WARN] WISHES 1: Rasio Berat (%.2f) >= %.0f:1\n', ...
+weight_to_payload_ratio, target_weight_ratio); end % -------------------- WISHES
+3: Waktu Misi -------------------- if total_mission_time < target_mission_time
+fprintf(' [PASS] WISHES 3: Waktu Misi (%.1f s) < %.0f s\n', ...
+total_mission_time, target_mission_time); else fprintf(' [WARN] WISHES 3: Waktu
+Misi (%.1f s) >= %.0f s\n', ... total_mission_time, target_mission_time); end %
+-------------------- DEMAND 2: Stabilitas -------------------- if
+all(stability_status) fprintf(' [PASS] DEMAND 2: Stabilitas Terjaga (y_max <
+%.1f cm)\n', ... target_stability); else idx_aman = find(stability_status, 1,
+'last'); if ~isempty(idx_aman) && idx_aman < length(v_test) fprintf(' [WARN]
+DEMAND 2: Risiko Tumpah pada Kecepatan > %.1f m/s\n', ... v_test(idx_aman));
+elseif isempty(idx_aman) fprintf(' [FAIL] DEMAND 2: Tidak aman pada semua
+kecepatan\n'); else fprintf(' [WARN] DEMAND 2: Semua kecepatan aman\n'); end end
+fprintf('\n========================================\n');
+======================================== KELOMPOK 2 - DESIGN EVALUATION REPORT
+PRD FTMD 2026 - Kelas 56 Automatic Water Trucking Machine
+======================================== --- PARAMETER KENDARAAN --- Massa
+Kering (m_dry) : 1.450 kg Massa Air (m_water) : 0.680 kg (680.0 ml) Massa Total
+(m_total) : 2.130 kg Rasio Berat/Payload : 2.13 : 1 Kecepatan Rata-rata : 0.15
+m/s Estimasi Waktu Misi : 50.0 detik Estimasi Biaya : Rp 500000 --- STATUS
+KEPATUHAN --- [PASS] DEMAND 1: Volume Air (680.0 ml) >= 550 ml [WARN] WISHES 1:
+Rasio Berat (2.13) >= 2:1 [PASS] WISHES 3: Waktu Misi (50.0 s) < 60 s [WARN]
+DEMAND 2: Semua kecepatan aman ========================================
+======================================================================== 4.
+VISUALISASI KPI DASHBOARD
+========================================================================
+figure('Name', 'KPI Dashboard - Kelompok 2 PRD FTMD 2026', ... 'Position', [50,
+50, 1200, 700], 'Color', 'white'); % --- Subplot 1: Rasio Berat vs Target ---
+subplot(2,3,1); bar(weight_to_payload_ratio, 'FaceColor', [0.2, 0.6, 0.8]); hold
+on; xl = xlim; line(xl, [target_weight_ratio, target_weight_ratio], ... 'Color',
+'r', 'LineStyle', '--', 'LineWidth', 2); ylim([0, max(weight_to_payload_ratio,
+target_weight_ratio) * 1.3]); title('Rasio Berat vs Payload', 'FontSize', 12,
+'FontWeight', 'bold'); ylabel('Rasio (X:1)'); grid on; if
+weight_to_payload_ratio < target_weight_ratio text(1, weight_to_payload_ratio +
+0.2, 'OK', ... 'HorizontalAlignment', 'center', 'Color', 'g', 'FontWeight',
+'bold'); else text(1, weight_to_payload_ratio + 0.2, 'WARN', ...
+'HorizontalAlignment', 'center', 'Color', 'r', 'FontWeight', 'bold'); end hold
+off; % --- Subplot 2: Waktu Misi --- subplot(2,3,2); bar([time_travel,
+docking_time], 'FaceColor', [0.3, 0.7, 0.4]); hold on; xl = xlim; line(xl,
+[target_mission_time, target_mission_time], ... 'Color', 'r', 'LineStyle', '--',
+'LineWidth', 2); ylim([0, max(total_mission_time, target_mission_time) * 1.3]);
+title('Distribusi Waktu Misi', 'FontSize', 12, 'FontWeight', 'bold');
+ylabel('Waktu (detik)'); set(gca, 'XTickLabel', {'Perjalanan', 'Docking'}); grid
+on; if total_mission_time < target_mission_time text(1.5, total_mission_time +
+2, 'OK', ... 'HorizontalAlignment', 'center', 'Color', 'g', 'FontWeight',
+'bold'); else text(1.5, total_mission_time + 2, 'WARN', ...
+'HorizontalAlignment', 'center', 'Color', 'r', 'FontWeight', 'bold'); end hold
+off; % --- Subplot 3: Volume Air --- subplot(2,3,3); bar(total_water_vol,
+'FaceColor', [0.8, 0.4, 0.2]); hold on; xl = xlim; line(xl,
+[target_water_volume, target_water_volume], ... 'Color', 'r', 'LineStyle', '--',
+'LineWidth', 2); ylim([0, max(total_water_vol, target_water_volume) * 1.3]);
+title('Volume Air Total', 'FontSize', 12, 'FontWeight', 'bold'); ylabel('Volume
+(ml)'); grid on; if total_water_vol >= target_water_volume text(1,
+total_water_vol + 20, 'PASS', ... 'HorizontalAlignment', 'center', 'Color', 'g',
+'FontWeight', 'bold'); else text(1, total_water_vol + 20, 'FAIL', ...
+'HorizontalAlignment', 'center', 'Color', 'r', 'FontWeight', 'bold'); end hold
+off; % --- Subplot 4: Komposisi Massa (Pie Chart) --- subplot(2,3,4);
+massa_labels = {sprintf('MDF (%.2f kg)', m_mdf_structure), ...
+sprintf('Elektronik (%.2f kg)', m_electronics + m_motor + m_roda), ...
+sprintf('Air (%.2f kg)', m_water)}; massa_values = [m_mdf_structure,
+m_electronics + m_motor + m_roda, m_water]; pie(massa_values, massa_labels);
+title('Komposisi Massa Total', 'FontSize', 12, 'FontWeight', 'bold'); % ---
+Subplot 5: Metrik Performa --- subplot(2,3,5); criteria = {'Volume Air',
+'Berat/Payload', 'Waktu Misi', 'Stabilitas'}; performance = [min(1,
+total_water_vol/target_water_volume); ... min(1,
+target_weight_ratio/weight_to_payload_ratio); ... min(1,
+target_mission_time/total_mission_time); ... mean(stability_status)];
+performance = max(0, performance) * 100; bar(performance, 'FaceColor', [0.5,
+0.6, 0.9]); hold on; xl = xlim; line(xl, [80, 80], 'Color', 'g', 'LineStyle',
+'--', 'LineWidth', 1.5); line(xl, [60, 60], 'Color', 'r', 'LineStyle', '--',
+'LineWidth', 1.5); ylim([0, 120]); title('Metrik Performa (%)', 'FontSize', 12,
+'FontWeight', 'bold'); ylabel('Nilai (%)'); set(gca, 'XTickLabel', criteria);
+grid on; hold off; % --- Subplot 6: Stabilitas vs Kecepatan --- subplot(2,3,6);
+plot(v_test, y_max, '-o', 'LineWidth', 2, 'MarkerSize', 8, 'Color', [0.8, 0.2,
+0.2]); hold on; xl = xlim; line(xl, [target_stability, target_stability], ...
+'Color', 'g', 'LineStyle', '--', 'LineWidth', 2); xlabel('Kecepatan (m/s)');
+ylabel('Simpangan Maksimum (cm)'); title(sprintf('Stabilitas vs Kecepatan
+(Gundukan %dmm)', bump_width), ... 'FontSize', 12, 'FontWeight', 'bold'); grid
+on; xlim([0.05, 0.35]); % Highlight area aman idx_aman = find(y_max <=
+target_stability); if ~isempty(idx_aman) fill([v_test(idx_aman(1)),
+v_test(idx_aman(end)), ... v_test(idx_aman(end)), v_test(idx_aman(1))], ... [0,
+0, target_stability, target_stability], ... 'g', 'FaceAlpha', 0.1, 'EdgeColor',
+'none'); end
+======================================================================== 5.
+KESIMPULAN & REKOMENDASI
+========================================================================
+fprintf('\n========================================\n'); fprintf(' KESIMPULAN &
+REKOMENDASI\n'); fprintf(' Kelompok 2 - PRD FTMD 2026 (Kelas 56)\n');
+fprintf('========================================\n\n'); all_demands_pass =
+(total_water_vol >= target_water_volume) && all(stability_status);
+all_wishes_pass = (weight_to_payload_ratio < target_weight_ratio) && ...
+(total_mission_time < target_mission_time); if all_demands_pass &&
+all_wishes_pass fprintf('STATUS: SANGAT BAIK - Semua Demands & Wishes
+terpenuhi\n'); fprintf('REKOMENDASI: Desain siap untuk produksi dan uji
+lapangan\n'); elseif all_demands_pass && ~all_wishes_pass fprintf('STATUS: BAIK
+- Semua Demands terpenuhi, beberapa Wishes perlu optimasi\n');
+fprintf('REKOMENDASI: Optimasi kecepatan atau kurangi massa dry\n'); else
+fprintf('STATUS: PERLU REVISI - Ada Demands yang belum terpenuhi\n');
+fprintf('REKOMENDASI: Tambah volume air atau perbaiki stabilitas\n'); end
+fprintf('\nDETAIL REKOMENDASI:\n'); if weight_to_payload_ratio >=
+target_weight_ratio fprintf(' - Kurangi massa bodi (gunakan material lebih
+ringan)\n'); end if total_mission_time >= target_mission_time fprintf(' -
+Tingkatkan kecepatan rata-rata (optimasi motor)\n'); end if
+~all(stability_status) fprintf(' - Tambahkan suspensi atau kurangi kecepatan
+melewati gundukan\n'); fprintf(' Spesifikasi gundukan: %d mm x %d mm, %d
+buah\n', ... bump_width, bump_height, n_bumps); idx_aman =
+find(stability_status, 1, 'last'); if ~isempty(idx_aman) fprintf(' Kecepatan
+aman maksimum: %.2f m/s\n', v_test(idx_aman)); else fprintf(' Tidak ada
+kecepatan yang aman\n'); end end
+fprintf('\n========================================\n'); disp('Evaluasi
+Selesai'); ======================================== KESIMPULAN & REKOMENDASI
+Kelompok 2 - PRD FTMD 2026 (Kelas 56) ========================================
+STATUS: PERLU REVISI - Ada Demands yang belum terpenuhi REKOMENDASI: Tambah
+volume air atau perbaiki stabilitas DETAIL REKOMENDASI: - Kurangi massa bodi
+(gunakan material lebih ringan) - Tambahkan suspensi atau kurangi kecepatan
+melewati gundukan Spesifikasi gundukan: 40 mm x 20 mm, 3 buah Kecepatan aman
+maksimum: 0.30 m/s ======================================== Evaluasi Selesai
+Published with MATLAB® R2026a
