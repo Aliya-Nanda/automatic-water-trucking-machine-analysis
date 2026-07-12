@@ -18,6 +18,7 @@ The analysis supports engineering decision-making through quantitative evaluatio
 
 ---
 
+![MATLAB Results](matlab_dashboard.png)
 ## 🎯 Objectives
 
 - Evaluate prototype performance using engineering metrics
