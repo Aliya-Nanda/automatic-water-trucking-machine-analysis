@@ -1,3 +1,7 @@
+## Project Preview
+
+![MATLAB Results](performance_results.png)
+
 # 🚚 Automatic Water Trucking Machine Performance Analysis
 
 MATLAB-based engineering performance analysis for the **Automatic Water Trucking Machine**, an autonomous prototype developed to simulate clean water distribution in disaster response scenarios.
